@@ -1,61 +1,381 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Del huerto a tu casa</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; background: #f7f7f7; color: #333; }
-        header { background: #4caf50; color: white; padding: 2rem; text-align: center; }
-        section { padding: 2rem; }
-        .productos { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
-        .producto { background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .producto img { width: 100%; border-radius: 8px; }
-        .whatsapp { display: block; margin: 2rem auto; text-align: center; }
-        .whatsapp a { background: #25d366; color: white; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; font-weight: bold; }
-        footer { background: #4caf50; color: white; text-align: center; padding: 1rem; margin-top: 2rem; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title> Huerto - Tienda de Verduras</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Para que el navbar sea pegajoso */
+    .sticky-nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    /* Asegurando que las imágenes del carrito tengan un tamaño consistente */
+    .cart-image {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    /* Animación de los productos */
+    .producto {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.5s ease-out;
+    }
+
+    .producto.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Animación del carrito */
+    .cart-animation {
+      transition: transform 0.3s ease;
+    }
+
+    /* Fondo de la página */
+    body {
+      background: linear-gradient(to bottom right, #e0f7fa, #a5d6a7);
+    }
+
+    /* Botones con animación de hover */
+    .btn-hover:hover {
+      background-color: #388e3c;
+      transform: scale(1.05);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Sombra sutil para las tarjetas de productos */
+    .producto:hover {
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Fondo degradado en el pie de página */
+    footer {
+      background: linear-gradient(to top, #388e3c, #a5d6a7);
+    }
+  </style>
 </head>
-<body>
-    <header>
-        <h1>Del huerto a tu casa</h1>
-        <p>Productos frescos y 100% naturales, cultivados sin químicos.</p>
-    </header>
-    <section>
-        <h2>Productos</h2>
-        <div class="productos">
-            <div class="producto">
-                <img src="https://via.placeholder.com/200x150.png?text=Tomates" alt="Tomates">
-                <h3>Tomates</h3>
-                <p>Q5 la libra</p>
-            </div>
-            <div class="producto">
-                <img src="https://via.placeholder.com/200x150.png?text=Zanahorias" alt="Zanahorias">
-                <h3>Zanahorias</h3>
-                <p>Q4 la libra</p>
-            </div>
-            <div class="producto">
-                <img src="https://via.placeholder.com/200x150.png?text=Lechugas" alt="Lechugas">
-                <h3>Lechugas</h3>
-                <p>Q3 la unidad</p>
-            </div>
-            <div class="producto">
-                <img src="https://via.placeholder.com/200x150.png?text=Cebollas" alt="Cebollas">
-                <h3>Cebollas</h3>
-                <p>Q3.50 la libra</p>
-            </div>
-            <div class="producto">
-                <img src="https://via.placeholder.com/200x150.png?text=Pimientos" alt="Pimientos">
-                <h3>Pimientos</h3>
-                <p>Q6 la libra</p>
-            </div>
-        </div>
-    </section>
-    <section class="whatsapp">
-        <a href="https://wa.me/50256179548" target="_blank">Haz tu pedido por WhatsApp</a>
-    </section>
-    <footer>
-        <p>&copy; 2025 Del huerto a tu casa</p>
-    </footer>
+<body class="bg-gray-100 text-gray-800">
+
+  <!-- NAVBAR -->
+  <header class="bg-white shadow sticky-nav p-4 flex justify-between items-center border-b">
+    <h1 class="text-2xl font-bold text-green-600">🌿 DEL HUERTO A TU CASA</h1>
+    <p class="text-2xl font-bold text-green-600 mt-2">Descubre el sabor auténtico y fresco de lo que cultivamos</p>
+    <nav class="space-x-4">
+      <a href="#productos" class="text-gray-700 hover:text-green-600 transition-all">Productos</a>
+      <a href="#sobre" class="text-gray-700 hover:text-green-600 transition-all">Sobre Nosotros</a>
+      <button onclick="toggleCart()" class="relative cart-animation">
+        🛒
+        <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 rounded-full">0</span>
+      </button>
+    </nav>
+  </header>
+  
+
+  <!-- FILTROS -->
+  <section class="max-w-6xl mx-auto px-4 mt-6">
+    <h2 class="text-xl font-bold mb-2">Filtrar por categoría</h2>
+    <div class="flex gap-4 flex-wrap">
+      <button id="btn-todo" onclick="filterProducts('todo', 'btn-todo')" class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition-all btn-hover">Todo</button>
+      <button id="btn-verduras" onclick="filterProducts('verduras', 'btn-verduras')" class="bg-gray-200 px-4 py-1 rounded hover:bg-green-200 transition-all btn-hover">Verduras</button>
+      <button id="btn-frutas" onclick="filterProducts('frutas', 'btn-frutas')" class="bg-gray-200 px-4 py-1 rounded hover:bg-green-200 transition-all btn-hover">Frutas</button>
+      <button id="btn-cajas" onclick="filterProducts('cajas', 'btn-cajas')" class="bg-gray-200 px-4 py-1 rounded hover:bg-green-200 transition-all btn-hover">Cajas</button>
+    </div>
+  </section>
+
+  <!-- PRODUCTOS -->
+  <main id="producto" class="max-w-6xl mx-auto p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
+    
+    <!-- Producto 1 -->
+    <div class="producto verduras bg-white rounded-xl shadow-md p-4 transition-all transform hover:scale-105" data-image="1.jpg">
+      <img src="1.jpg" class="rounded mb-2 w-full h-48 object-cover">
+       <!-- Etiqueta Orgánico -->
+  <span class="absolute top-2 left-2 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full shadow">
+    🌿 Orgánico
+  </span>
+      <h3 class="text-lg font-semibold">Zanahorias</h3>
+      <p class="text-green-600 font-bold mb-2">Q. 4.00 /unidad</p>
+      <p class="text-gray-700 mb-4">  Ideal para jugos, ensaladas o cocida.
+      </p>
+      <button onclick="addToCart('Zanahorias', 4, '1.jpg')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-all btn-hover">Agregar</button>
+    </div>
+
+    <!-- Producto 2 -->
+    <div class="producto verduras  bg-white rounded-xl shadow-md p-4 transition-all transform hover:scale-105" data-image="3.jpg">
+      <img src="3.jpg" class="rounded mb-2 w-full h-48 object-cover">
+       <!-- Etiqueta Orgánico -->
+  <span class="absolute top-2 left-2 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full shadow">
+    🌿 Orgánico
+  </span>
+      <h3 class="text-lg font-semibold">Tomates</h3>
+      <p class="text-green-600 font-bold mb-2">Q. 5.50 / lb</p>
+      <p class="text-gray-700 mb-4"> Perfecto para ensaladas y salsas. Jugoso y fresco</p>
+      <button onclick="addToCart('Tomates', 5.5, '3.jpg')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-all btn-hover">Agregar</button>
+    </div>
+
+    <!-- Producto 3 -->
+    <div class="producto verduras bg-white rounded-xl shadow-md p-4 transition-all transform hover:scale-105" data-image="1.jpg">
+      <img src="4.jpg" class="rounded mb-2 w-full h-48 object-cover">
+       <!-- Etiqueta Orgánico -->
+  <span class="absolute top-2 left-2 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full shadow">
+    🌿 Orgánico
+  </span>
+      <h3 class="text-lg font-semibold">Pepino</h3>
+      <p class="text-green-600 font-bold mb-2">Q. 4.00/Unidad</p>
+      <p class="text-gray-700 mb-4">  Refrescante e hidratante. Úsalo en ensaladas o aguas frescas.</p>
+      <button onclick="addToCart('Pepinos', 4, '4.jpg')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-all btn-hover">Agregar</button>
+    </div>
+
+    <!-- Producto 4 -->
+    <div class="producto verduras bg-white rounded-xl shadow-md p-4 transition-all transform hover:scale-105" data-image="2.jpg">
+      <img src="2.jpg" class="rounded mb-2 w-full h-48 object-cover">
+       <!-- Etiqueta Orgánico -->
+  <span class="absolute top-2 left-2 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full shadow">
+    🌿 Orgánico
+  </span>
+      <h3 class="text-lg font-semibold">Lechuga</h3>
+      <p class="text-green-600 font-bold mb-2">Q. 4.00 / Unidad</p>
+      <p class="text-gray-700 mb-4"> Suave y ligera, excelente base para cualquier ensalada.</p>
+      <button onclick="addToCart('Lechuga', 4, '2.jpg')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-all btn-hover">Agregar</button>
+    </div>
+    <!-- Producto 5 -->
+    <div class="producto verduras bg-white rounded-xl shadow-md p-4 transition-all transform hover:scale-105" data-image="2.jpg">
+      <img src="5.jpg" class="rounded mb-2 w-full h-48 object-cover">
+       <!-- Etiqueta Orgánico -->
+  <span class="absolute top-2 left-2 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full shadow">
+    🌿 Orgánico
+  </span>
+      <h3 class="text-lg font-semibold">Acelga</h3>
+      <p class="text-green-600 font-bold mb-2">Q. 5.00 / Unidad</p>
+      <p class="text-gray-700 mb-4 text-sm">Rica en fibra y hierro. Ideal para sopas,salteada.</p>
+      <button onclick="addToCart('Acelga', 4, '5.jpg')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-all btn-hover">Agregar</button>
+    </div>
+    <!-- Producto 6 -->
+    <div class="producto verduras bg-white rounded-xl shadow-md p-4 transition-all transform hover:scale-105" data-image="6.jpg">
+      <img src="6.jpg" class="rounded mb-2 w-full h-48 object-cover">
+       <!-- Etiqueta Orgánico -->
+  <span class="absolute top-2 left-2 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full shadow">
+    🌿 Orgánico
+  </span>
+      <h3 class="text-lg font-semibold">Remolacha</h3>
+      <p class="text-green-600 font-bold mb-2">Q. 4.00 / Unidad</p>
+       <p class="text-gray-700 mb-4 text-sm">Nutritiva y dulce, buena para jugos, ensaladas o al horno.</p>
+      <button onclick="addToCart('Remolacha', 4, '6.jpg')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-all btn-hover">Agregar</button>
+    </div>
+    <!-- Producto 7 -->
+    <div class="producto verduras bg-white rounded-xl shadow-md p-4 transition-all transform hover:scale-105" data-image="7.jpg">
+      <img src="7.jpg" class="rounded mb-2 w-full h-48 object-cover">
+       <!-- Etiqueta Orgánico -->
+  <span class="absolute top-2 left-2 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full shadow">
+    🌿 Orgánico
+  </span>
+      <h3 class="text-lg font-semibold">Cebolla</h3>
+      <p class="text-green-600 font-bold mb-2">Q. 4.00 / Unidad</p>
+      <p class="text-gray-700 mb-4"> Da sabor y beneficios a todos tus platillos.</p>
+      <button onclick="addToCart('Cebolla', 4, '7.jpg')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-all btn-hover">Agregar</button>
+    </div>
+    <!-- Producto 8 -->
+    <div class="producto verduras bg-white rounded-xl shadow-md p-4 transition-all transform hover:scale-105" data-image="8.jpg">
+      <img src="8.jpg" class="rounded mb-2 w-full h-48 object-cover">
+       <!-- Etiqueta Orgánico -->
+  <span class="absolute top-2 left-2 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full shadow">
+    🌿 Orgánico
+  </span>
+      <h3 class="text-lg font-semibold">Coliflor</h3>
+      <p class="text-green-600 font-bold mb-2">Q. 10.00 / Unidad</p>
+      <p class="text-gray-700 mb-4">Para comidas saludable, rica en fibra y vitamina C</p>
+      <button onclick="addToCart('Coliflor', 10, '8.jpg')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-all btn-hover">Agregar</button>
+    </div>
+    
+    <!-- Producto 9 -->
+    <div class="producto frutas bg-white rounded-xl shadow-md p-4 transition-all transform hover:scale-105" data-image="9.jpg">
+      <img src="9.jpg" class="rounded mb-2 w-full h-48 object-cover">
+       <!-- Etiqueta Orgánico -->
+  <span class="absolute top-2 left-2 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full shadow">
+    🌿 Orgánico
+  </span>
+      <h3 class="text-lg font-semibold">Melocotón</h3>
+      <p class="text-green-600 font-bold mb-2">Q. 3.00 / Unidad</p>
+      <p class="text-gray-700 mb-4">Proximamente... </p>
+      <button onclick="addToCart('Melocotón', 3, '9.jpg')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-all btn-hover">Agregar</button>
+    </div>
+    <!-- Producto 10 -->
+    <div class="producto frutas bg-white rounded-xl shadow-md p-4 transition-all transform hover:scale-105" data-image="10.jpg">
+      <img src="10.jpg" class="rounded mb-2 w-full h-48 object-cover">
+       <!-- Etiqueta Orgánico -->
+  <span class="absolute top-2 left-2 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full shadow">
+    🌿 Orgánico
+  </span>
+      <h3 class="text-lg font-semibold">Naranja</h3>
+      <p class="text-green-600 font-bold mb-2">Q. 3.00 / Unidad</p>
+      <p class="text-gray-700 mb-4"> Proximamente... </p>
+      <button onclick="addToCart('Naranja', 3, '10.jpg')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-all btn-hover">Agregar</button>
+    </div>
+    <!-- Producto 11 -->
+    <div class="producto verduras bg-white rounded-xl shadow-md p-4 transition-all transform hover:scale-105" data-image="9.jpg">
+      <img src="11.jpg" class="rounded mb-2 w-full h-48 object-cover">
+       <!-- Etiqueta Orgánico -->
+  <span class="absolute top-2 left-2 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full shadow">
+    🌿 Orgánico
+  </span>
+      <h3 class="text-lg font-semibold">Aguacate</h3>
+      <p class="text-green-600 font-bold mb-2">Q. 5.00 / Unidad</p>
+      <p class="text-gray-700 mb-4">Proximamente.... </p>
+      <button onclick="addToCart('Aguacate', 5, '11.jpg')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-all btn-hover">Agregar</button>
+    </div>
+     <!-- Producto 12 -->
+    <div class="producto cajas bg-white rounded-xl shadow-md p-4 transition-all transform hover:scale-105" data-image="12.jpg">
+      <img src="12.jpg" class="rounded mb-2 w-full h-48 object-cover">
+       <!-- Etiqueta Orgánico -->
+  <span class="absolute top-2 left-2 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full shadow">
+    🌿 Orgánico
+  </span>
+      <h3 class="text-lg font-semibold">Tomate</h3>
+      <p class="text-green-600 font-bold mb-2">Q. 300 caja</p>
+      <p class="text-gray-700 mb-4"> Perfecto para ensaladas y salsas. Jugoso y fresco</p>
+      <button onclick="addToCart('Tomate', 300, '12.jpg')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-all btn-hover">Agregar</button>
+    </div>
+
+  </main>
+ 
+
+  <!-- SOBRE NOSOTROS -->
+  <section id="sobre" class="bg-white py-10 mt-10 shadow-inner">
+    <div class="max-w-4xl mx-auto px-4">
+      <h2 class="text-2xl font-bold mb-4">Sobre Nosotros</h2>
+      <p class="text-lg text-gray-700">
+
+En nuestro huerto, cultivamos verduras y frutas frescas, locales y sostenibles utilizando los principios de la permacultura. Como propietario, me dedico a ofrecerte productos de la más alta calidad, cultivados de manera responsable y sostenible, respetando los ciclos naturales de la tierra. Cada verdura y fruta que llega a tu mesa es una muestra de nuestro trabajo y compromiso con la permacultura, una práctica que favorece la salud del suelo, la biodiversidad y el equilibrio ecológico.
+        
+        </p>
+    </div>
+  </section>
+
+  <!-- PIE DE PÁGINA -->
+  <footer class="bg-gray-800 text-white text-center py-4 mt-10">
+    <p>&copy; 2025-2026 Huerto. Todos los derechos reservados.</p>
+  </footer>
+  
+
+  <!-- CARRITO -->
+  <div id="cart" class="fixed right-0 top-0 h-full w-80 bg-white shadow-lg p-4 transform translate-x-full transition-transform duration-300 z-50 overflow-y-auto">
+    <h3 class="text-xl font-bold mb-4">🛒 Carrito</h3>
+    <ul id="cart-items" class="mb-4 space-y-2"></ul>
+    <p class="font-bold">Total: Q.<span id="cart-total">0.00</span></p>
+    <a id="whatsapp-link" target="_blank" class="block mt-4 text-center bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-all">Pedir por WhatsApp</a>
+    <button onclick="toggleCart()" class="mt-2 w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-all">Cerrar</button>
+  </div>
+
+  <!-- JS -->
+  <script>
+    let cart = [];
+
+    function addToCart(product, price, image) {
+      // Buscar si el producto ya existe en el carrito
+      const existingProduct = cart.find(item => item.product === product);
+      if (existingProduct) {
+        // Si el producto ya está, aumentamos la cantidad
+        existingProduct.quantity++;
+      } else {
+        // Si el producto no está, lo agregamos con cantidad 1
+        cart.push({ product, price, quantity: 1, image });
+      }
+
+      updateCartDisplay();
+      updateCartIcon();
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCartDisplay();
+      updateCartIcon();
+    }
+
+    function updateCartDisplay() {
+      const list = document.getElementById('cart-items');
+      const total = document.getElementById('cart-total');
+      const whatsappLink = document.getElementById('whatsapp-link');
+
+      list.innerHTML = '';
+      let sum = 0;
+      let message = 'Hola, Buen día. Quiero pedir lo siguiente:%0A';
+
+      cart.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.classList.add('flex', 'justify-between', 'items-center', 'border-b', 'pb-1');
+        li.innerHTML = 
+          `<div class="flex items-center gap-2">
+            <img src="${item.image}" class="cart-image">
+            <span>${item.product} - Q.${item.price.toFixed(2)} x ${item.quantity}</span>
+          </div>
+          <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700">❌</button>`;
+        list.appendChild(li);
+        sum += item.price * item.quantity;
+        message += `• ${item.product} - Q.${item.price.toFixed(2)} x ${item.quantity}%0A`;
+      });
+
+      total.innerText = sum.toFixed(2);
+      message += `%0ATotal: Q.${sum.toFixed(2)}`;
+      whatsappLink.href = `https://wa.me/+50212345678?text=${message}`;
+    }
+
+    function updateCartIcon() {
+      const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+      document.getElementById('cart-count').innerText = cartCount;
+    }
+
+    function toggleCart() {
+      const cartEl = document.getElementById('cart');
+      cartEl.classList.toggle('translate-x-full');
+    }
+
+    function filterProducts(categoria, btnId) {
+      const productos = document.querySelectorAll('.producto');
+      productos.forEach(p => {
+        p.style.display = (categoria === 'todo' || p.classList.contains(categoria)) ? 'block' : 'none';
+      });
+
+      ['btn-todo', 'btn-verduras', 'btn-frutas', 'btn-cajas'].forEach(id => {
+        const btn = document.getElementById(id);
+        btn.classList.remove('bg-green-600', 'text-white');
+        btn.classList.add('bg-gray-200', 'text-black');
+      });
+
+      const activeBtn = document.getElementById(btnId);
+      activeBtn.classList.remove('bg-gray-200', 'text-black');
+      activeBtn.classList.add('bg-green-600', 'text-white');
+    }
+
+    window.onload = () => {
+      filterProducts('todo', 'btn-todo');
+      setTimeout(() => {
+        document.querySelectorAll('.producto').forEach((prod, index) => {
+          setTimeout(() => prod.classList.add('show'), index * 100);
+        });
+      }, 1000);
+    };
+  </script>
+  
+
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
